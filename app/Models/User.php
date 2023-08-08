@@ -12,6 +12,7 @@ use Laravel\Sanctum\NewAccessToken;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
+    // HasApiTokens this trait it use to generate token
     use HasApiTokens, HasFactory, Notifiable;
 
     /**
@@ -127,19 +128,31 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function routeNotificationForMail($notification = null)
     {
+        // the values in email felid in DB they are send to them notification email
         return $this->email;
     }
 
-    public function routeNotificationForNexmo($notification = null)
+    // public function routeNotificationForNexmo($notification = null)
+    // {
+    //     return $this->mobile_number;
+    // }
+
+    public function routeNotificationForVonage($notification): string
     {
+        // this default name that understand by laravel
+        // return $this->phone_number;
+        // here me use custom column
         return $this->mobile_number;
     }
 
+
+    // this's represent the custom notification (sms)
     public function routeNotificationForNepras($notification = null)
     {
         return $this->mobile_number;
     }
 
+    // this method it use to change name of channel
     public function receivesBroadcastNotificationsOn()
     {
         return 'App.Models.User.' . $this->id;
@@ -152,6 +165,7 @@ class User extends Authenticatable implements MustVerifyEmail
      * @param  array  $abilities
      * @return \Laravel\Sanctum\NewAccessToken
      */
+    // here I make override on function it found in HasApiTokens.php trait
     public function createToken(string $name, array $abilities = ['*'], $fcm_token = null)
     {
         $token = $this->tokens()->create([

@@ -4,14 +4,13 @@ namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Client\ProjectRequest;
-use Illuminate\Support\Str;
 use App\Models\Category;
 use App\Models\Project;
 use App\Models\Tag;
-use Auth;
-use DB;
 use Illuminate\Http\Request;
-use Storage;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ProjectsController extends Controller
 {
@@ -20,26 +19,21 @@ class ProjectsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-
     public function index()
     {
         $user = Auth::user();
+        //$projects = Project::with('category')->where('user_id', '=', $user->id)->paginate();
+        $projects = $user->projects()
+            // this method it use to don't allow of any global scope to executed.
+            // ->withoutGlobalScopes()
 
-        // this's best in performance
-
-
-
-        // this's relation just between projects and categories tables without parent in categories table
-        // $projects = DB::table('projects')
-        //     ->select('projects.*', 'parent.name as parent_name')
-        //     ->leftJoin('categories as parent', 'projects.category_id', '=', 'parent.id')
-        //     ->where('user_id', '=', $user->id)
-        //     ->paginate();
-
-        // dd($projects[0]);
-
-        //other way
-        $projects = $user->projects()->with('category.parent')->paginate();
+            // it use to execute specific global scope
+            ->withoutGlobalScope('active')
+            ->filter(['status' => 'open', 'budget_min' => 1000, 'budget_max' => 4000])
+            // here high() represent local scope
+            ->high()
+            ->with('category.parent', 'tags')
+            ->paginate();
 
         return view('client.projects.index', [
             'projects' => $projects,
@@ -48,6 +42,8 @@ class ProjectsController extends Controller
 
     /**
      * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
      */
     public function create()
     {
@@ -65,30 +61,25 @@ class ProjectsController extends Controller
      * @param  \Illuminate\Http\ProjectRequest  $request
      * @return \Illuminate\Http\Response
      */
-
     public function store(ProjectRequest $request)
     {
         $user = $request->user();
 
-        $data = $request->except('attachments');
-
-        // here I add key to data array and value it attachments array
-        $data['attachments'] = $this->uploadAttachments($request);
-
-        // other way to insert project
         // $request->merge([
-        //     'user_id' => Auth::id(),
-        //     //other way to get id of user authentication
-        //     // 'user_id' => $user->id,
+        //     'user_id' => $user->id, // Auth::id()
         // ]);
         // $project = Project::create($request->all());
 
-        // here already will take user_id from authentication user and insert it
+        $data = $request->except('attachments');
+        $data['attachments'] = $this->uploadAttachments($request);
+
         $project = $user->projects()->create($data);
         $tags = explode(',', $request->input('tags'));
         $project->syncTags($tags);
 
-        return redirect()->route('client.projects.index')->with('success', 'Project added');
+        return redirect()
+            ->route('client.projects.index')
+            ->with('success', __('Project added'));
     }
 
     /**
@@ -97,25 +88,21 @@ class ProjectsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-
     public function show($id)
     {
         $user = Auth::user();
-        $project = DB::table('projects')->where([
-            'user_id' => $user->id,
-            'id' => $id,
-        ])->get();
-
-        // other way to get project
-        // $project = $user->projects()->findOrFail($id);
+        $project = $user->projects()->findOrFail($id);
 
         return view('client.projects.show', compact('project'));
     }
 
     /**
      * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
      */
-    public function edit(string $id)
+    public function edit($id)
     {
         $user = Auth::user();
         $project = $user->projects()->findOrFail($id);
@@ -135,23 +122,21 @@ class ProjectsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-
-    public function update(ProjectRequest $request, string $id)
+    public function update(ProjectRequest $request, $id)
     {
         $user = Auth::user();
         $project = $user->projects()->findOrFail($id);
 
         $data = $request->except('attachments');
-
         $data['attachments'] = array_merge(($project->attachments ?? []), $this->uploadAttachments($request));
 
         $project->update($data);
-
         $tags = explode(',', $request->input('tags'));
         $project->syncTags($tags);
 
-
-        return redirect()->route('client.projects.index')->with('success', 'Project updated');
+        return redirect()
+            ->route('client.projects.index')
+            ->with('success', __(__('Project updated')));
     }
 
     /**
@@ -160,31 +145,28 @@ class ProjectsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-
-    public function destroy(string $id)
+    public function destroy($id)
     {
-        // $project = Project::where('user_id', Auth::id())
+        // Project::where('user_id', Auth::id())
         //     ->where('id', $id)
         //     ->delete();
 
-        // other way to deleting processing
         $user = Auth::user();
-        $project = $user->projects()->where('id', $id);
+        $project = $user->projects()->findOrFail($id);
         $project->delete();
 
         foreach ($project->attachments as $file) {
-            // other way
             // unlink(storage_path('app/public/' . $file));
             Storage::disk('public')->delete($file);
         }
 
-        return redirect()->route('client.projects.index')->with('success', 'Project deleted');
+        return redirect()
+            ->route('client.projects.index')
+            ->with('success', __('Project deleted'));
     }
 
     protected function categories()
     {
-        // here id represent key and name represent value
-        // here always will return collection
         return Category::pluck('name', 'id')->toArray();
     }
 
@@ -197,9 +179,7 @@ class ProjectsController extends Controller
         $attachments = [];
         foreach ($files as $file) {
             if ($file->isValid()) {
-                // path will take the path of file with name it
                 $path = $file->store('/attachments', [
-                    // here uploads it's represent custom disk in filesystem.php in config folder
                     'disk' => 'uploads',
                 ]);
                 $attachments[] = $path;

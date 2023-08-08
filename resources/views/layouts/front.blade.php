@@ -11,12 +11,15 @@
 
     <!-- CSS
 ================================================== -->
+    {{-- getCurrentLocaleDirection() this method return rtl Or ltr --}}
     @if (LaravelLocalization::getCurrentLocaleDirection() == 'rtl')
         <link rel="stylesheet" href="{{ asset('assets/front/css/style.rtl.css') }}">
     @else
         <link rel="stylesheet" href="{{ asset('assets/front/css/style.css') }}">
     @endif
     <link rel="stylesheet" href="{{ asset('assets/front/css/colors/blue.css') }}">
+
+    @vite('resources/js/app.js')
 
 </head>
 
@@ -144,8 +147,10 @@
                                 <li>
                                     <a href="#" class="current">{{ __('Language') }}</a>
                                     <ul class="dropdown-nav">
+                                        {{-- here will display all suppoeted languages --}}
                                         @foreach (LaravelLocalization::getSupportedLocales() as $localeCode => $properties)
                                             <li>
+                                                {{-- getLocalizedURL() this method I pass to it the code og language and it's will return the current url with language --}}
                                                 <a rel="alternate" hreflang="{{ $localeCode }}"
                                                     href="{{ LaravelLocalization::getLocalizedURL($localeCode, null, [], true) }}">
                                                     {{ $properties['native'] }}

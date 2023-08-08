@@ -2,13 +2,17 @@
 
 namespace App\Notifications;
 
+use App\Channels\Log;
+use App\Channels\Nepras;
 use App\Models\Freelancer;
 use App\Models\Proposal;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Notifications\Messages\VonageMessage;
 
 class NewProposalNotification extends Notification
 {
@@ -29,8 +33,22 @@ class NewProposalNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
         // return ['mail', 'database'];
+        // $via = ['database', 'mail', 'broadcast', 'vonage'];
+        // $via = ['database', 'mail', 'broadcast', 'nexmo'];
+        $via = [Log::class, Nepras::class];
+
+        if (!$notifiable instanceof AnonymousNotifiable) {
+
+            if ($notifiable->notify_mail) {
+                $via[] = 'mail';
+            }
+            if ($notifiable->notify_sms) {
+                $via[] = 'nexmo';
+            }
+        }
+
+        return $via;
     }
 
     /**
@@ -52,7 +70,7 @@ class NewProposalNotification extends Notification
 
         return (new MailMessage)
             ->subject('New Proposal')
-            ->greeting('Hello' . $notifiable->name)
+            ->greeting('Hello' . ($notifiable->name ?? ''))
             ->line($body)
             // ->from('notification@localhost.net', 'E-Lancer Notification')
             // here possible use custom view
@@ -61,6 +79,11 @@ class NewProposalNotification extends Notification
 
             //this represent concluding message
             ->salutation('Thanks you very mush');
+        // ->view('mails.proposal', [
+        //     'freelancer' => '$this->freelancer',
+        //     'notifiable' => $notifiable,
+        //     'proposal' => $this->proposal,
+        // ]);
     }
 
     public function toDatabase($notifiable)
@@ -77,12 +100,52 @@ class NewProposalNotification extends Notification
         );
 
         // here they are considered the main data possible added on it any extra data
+        // other way to send data to broadcast channel
+        // return new Broadcast ([])
         return [
             'title' => 'New Proposal',
             'body' => $body,
             'icon' => 'icon-material-outline-group',
             'url' => route('client.projects.show', $this->proposal->project_id),
         ];
+    }
+
+    /**
+     * Get the Vonage / SMS representation of the notification.
+     */
+    public function toVonage($notifiable): VonageMessage
+    {
+        $body = sprintf(
+            '%s applied for a job %s',
+            $this->freelancer->name, // this will be instanced of the first %s
+            $this->proposal->project->title, // this will be instanced of the second %s
+        );
+
+        return (new VonageMessage)
+            // ->content('Your SMS message content');
+            ->content($body);
+    }
+
+    public function toLog($notifiable)
+    {
+        $body = sprintf(
+            '%s applied for a job %s',
+            $this->freelancer->name, // this will be instanced of the first %s
+            $this->proposal->project->title, // this will be instanced of the second %s
+        );
+
+        return $body;
+    }
+
+    public function toNepras($notifiable)
+    {
+        $body = sprintf(
+            '%s applied for a job %s',
+            $this->freelancer->name, // this will be instanced of the first %s
+            $this->proposal->project->title, // this will be instanced of the second %s
+        );
+
+        return $body;
     }
 
     /**

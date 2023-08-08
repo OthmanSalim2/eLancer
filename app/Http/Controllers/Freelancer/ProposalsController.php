@@ -93,8 +93,16 @@ class ProposalsController extends Controller
         // foreach ($admins as $admin) {
         //     $admin->notify(new NewProposalNotification($proposal, $user));
         // }
+
+        // this other way to send notification email to multiple user or admins
         //Notification::send($admins, new NewProposalNotification($proposal, $user));
 
+        // this's use to send the NotificationEmail to any email
+        /*
+            here must make this condition if (!$notifiable instanceof AnonymousNotifiable)
+            because if don't apply this condition will display AnonymousNotifiable
+            mean here I send the notificationEmail to anonymousUser
+        */
         // Notification::route('mail', 'test@example.org')
         //     ->notify(new NewProposalNotification($proposal, $user));
 

@@ -26,7 +26,7 @@
                             <!-- Notification -->
                             <li class="notifications-not-read">
                                 {{-- data it'd represnet the felid in database --}}
-                                <a href="{{ $notification->data['url'] }}?notify_id={{ $notification->id }}">
+                                <a href="{{ $notification->data['url'] }}?notify_id="{{ $notification->id }}">
                                     <span class="notification-icon"><i class="icon-material-outline-group"></i></span>
                                     <span class="notification-text">
                                         @if ($notification->unread())

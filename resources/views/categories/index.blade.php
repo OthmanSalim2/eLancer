@@ -3,9 +3,12 @@
 @section('page-title')
     Categories
     {{-- @if (Auth::user()->can('categories.create')) --}}
-    {{-- @can('create', App\Models\Category::class) --}}
-    <small><a href="{{ route('categories.create') }}" class="btn btn-sm btn-outline-primary">Create</a></small>
-    {{-- @endcan --}}
+    {{-- {{-- @can('categories.create') --}}
+    @can('create', App\Models\Category::class)
+        <small><a href="{{ route('categories.create') }}" class="btn btn-sm btn-outline-primary">Create</a></small>
+    @endcan
+
+    {{-- @endif --}}
 @endsection
 
 @section('content')
@@ -34,19 +37,28 @@
                         <td>{{ $category->parent_name }}</td>
                         <td>{{ $category->created_at }}</td>
                         <td>
-                            {{-- @can('update', $category) --}}
-                            <a href="{{ route('categories.edit', [$category->id]) }}" class="btn btn-sm btn-dark">Edit</a>
-                            {{-- @endcan --}}
+                            {{-- this when use policy to checking --}}
+                            @can('update', $category)
+                                {{-- thi's when use gate --}}
+                                {{-- @can('categories.update') --}}
+                                <a href="{{ route('categories.edit', [$category->id]) }}" class="btn btn-sm btn-dark">Edit</a>
+                            @endcan
                         </td>
                         <td>
+                            {{--
+                                here if In not identifier the authorization in
+                                AppServiceProvider laravel will put the default value for authorization
+                                it's false
+                                --}}
                             {{-- @if (Gate::allows('categories.delete')) --}}
-                            {{-- @can('delete', $category) --}}
-                            <form action="{{ route('categories.destroy', $category->id) }}" method="post">
-                                @csrf
-                                @method('delete')
-                                <button class="btn btn-sm btn-danger">Delete</button>
-                            </form>
-                            {{-- @endcan --}}
+                            {{-- @can('categories.delete') --}}
+                            @can('delete', $category)
+                                <form action="{{ route('categories.destroy', $category->id) }}" method="post">
+                                    @csrf
+                                    @method('delete')
+                                    <button class="btn btn-sm btn-danger">Delete</button>
+                                </form>
+                            @endcan
                         </td>
                     </tr>
                 @endforeach

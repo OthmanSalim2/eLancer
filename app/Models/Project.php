@@ -25,16 +25,19 @@ class Project extends Model
         'attachments' => 'json',
     ];
 
+    // this's array contains of column that don't show in response when convert the mode to json object
     protected $hidden = [
         'updated_at',
     ];
 
+    // I put inside this array the attributes that identifier as accessor method and return with data in response
     protected $appends = [
         'type_name',
     ];
 
     protected static function booted()
     {
+        // Global scope will executed automatic on project
         static::addGlobalScope('active', function (Builder $builder) {
             $builder->where('status', '=', 'open');
         });
@@ -42,6 +45,7 @@ class Project extends Model
 
     public function scopeFilter(Builder $builder, $filters = [])
     {
+        // array_merge between the new values and old values and make override on values
         $filters = array_merge([
             'type' => null,
             'status' => null,
@@ -53,6 +57,7 @@ class Project extends Model
             $builder->where('type', '=', $filters['type']);
         }
 
+        // here $value represent the value of $filters['type']
         $builder->when($filters['status'], function ($builder, $value) {
             $builder->where('status', '=', $value);
         });
@@ -66,6 +71,7 @@ class Project extends Model
         });
     }
 
+    // here always the scope passed to it instance of Builder.
     public function scopeHigh(Builder $builder)
     {
         $builder->orderBy('budget', 'DESC');
@@ -141,6 +147,7 @@ class Project extends Model
     // $project->type_name
     public function getTypeNameAttribute()
     {
+        // ucfirst() this make the first letter be capital
         return ucfirst($this->type);
     }
 

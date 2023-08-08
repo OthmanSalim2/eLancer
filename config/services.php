@@ -31,4 +31,18 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'vonage' => [
+        //     // the best be the sender of sms
+        //     // this's buy it from company that give sms service
+        'sms_from' => env('VONAGE_SMS_FROM'),
+        'api_key' => env('VONAGE_KEY'),
+        'api_secret' => env('VONAGE_SECRET'),
+    ],
+
+    'nepras' => [
+        'user' => env('NEPRAS_USER'),
+        'pass' => env('NEPRAS_PASS'),
+        'sender' => env('NEPRAS_SENDER'),
+    ],
+
 ];

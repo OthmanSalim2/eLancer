@@ -35,16 +35,24 @@ class CategoriesController extends Controller
 
     public function __construct()
     {
-        // $this->authorizeResource(Category::class);
+        // here must be the route identified of resource route
+        // here laravel will assume the name of parameter the same of model category
+        $this->authorizeResource(Category::class);
+        // here if was the parameter in url id not category here must to be passed to authorizeResource()
+        // $this->authorizeResource(Category::class, 'id');
     }
 
     // Actions
     public function index()
     {
-        // if (Gate::denies('categories.view')) {
-        //     abort(403);
-        // }
-        //$this->authorize('view-any', Category::class);
+        // this's will to service provider if found categories authorization
+        if (Gate::denies('categories.view')) {
+            abort(403);
+        }
+        // this when use policy
+        // the way writing the name of method by kabab case or camel case (viewAny)
+        // when pass the name of model laravel automatic understand the policy for this model
+        // $this->authorize('view-any', Category::class);
 
         //$categories = DB::table('categories')->get();
         // here will returned all felids from categories table and just name of parent table
@@ -88,9 +96,9 @@ class CategoriesController extends Controller
 
     public function create()
     {
-        // if (Gate::denies('categories.create')) {
-        //     abort(403);
-        // }
+        if (Gate::denies('categories.create')) {
+            abort(403);
+        }
         // $this->authorize('create', Category::class);
 
         $parents = Category::all();
@@ -101,9 +109,9 @@ class CategoriesController extends Controller
     public function store(Request $request)
     {
 
-        // if (Gate::denies('categories.create')) {
-        //     abort(403);
-        // }
+        if (Gate::denies('categories.create')) {
+            abort(403);
+        }
         // $this->authorize('create', Category::class);
 
         $clean = $request->validate($this->rules(), $this->messages);
@@ -163,6 +171,7 @@ class CategoriesController extends Controller
     public function update(Request $request, Category $category)
     {
         //$category = Category::findOrFail($id);
+        // here when pass object of model here too laravel understand thw policy for this model
         // $this->authorize('update', $category);
 
         $clean = $request->validate($this->rules(), $this->messages);

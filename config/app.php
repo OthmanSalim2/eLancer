@@ -96,6 +96,7 @@ return [
     |
     */
 
+    // it's represent the second language if don't found the first language
     'fallback_locale' => 'en',
 
     /*
@@ -165,7 +166,7 @@ return [
          */
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
-        // App\Providers\BroadcastServiceProvider::class,
+        App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         App\Providers\FortifyServiceProvider::class,
@@ -185,5 +186,8 @@ return [
     'aliases' => Facade::defaultAliases()->merge([
         // 'Example' => App\Facades\Example::class,
     ])->toArray(),
+
+
+    'api_key' => env('API_KEY'),
 
 ];

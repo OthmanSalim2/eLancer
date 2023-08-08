@@ -14,6 +14,8 @@
     <link rel="stylesheet" href="{{ asset('assets/front/css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/front/css/colors/blue.css') }}">
 
+    @vite('resources/js/app.js')
+
 </head>
 
 <body class="gray">
