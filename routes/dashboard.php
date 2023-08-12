@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Dashboard\CategoriesController;
+use App\Http\Controllers\Dashboard\ConfigController;
 use App\Http\Controllers\Dashboard\RolesController;
 use Illuminate\Support\Facades\Route;
 

@@ -147,7 +147,14 @@ class CategoriesController extends Controller
         }
 
         // $category = Category::create( $data );
-        // dispatch(new \App\Jobs\CreateCategoryJob($data));
+        dispatch(new \App\Jobs\CreateCategoryJob($data));
+
+        // onQueue method use to put name for the queue and then store queue in jobs table with new name
+        // dispatch(new \App\Jobs\CreateCategoryJob($data))->onQueue('import');
+        /* here to execute this queue in terminal we write php artisan queue:work --queue=high,import
+        high for executed the job fastly
+         or this php artisan queue:work --queue=import
+         */
 
         // PRG: Post Redirect Get
         return redirect()

@@ -2,13 +2,18 @@
 
 namespace App\Providers;
 
-use App;
+
+use App\Models\Config as ConfigModel;
 use App\Rules\FilterRule;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\App as FacadesApp;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider;
+use NumberFormatter;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -17,7 +22,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+
+        // include __DIR__ . '/../Helper.php';
+
+        // $app consider instance from service container.
+        // here I used singleton instanced of bind because when this class will return the same object from class at each times
+        $this->app->singleton('currency', function ($app) {
+            return new NumberFormatter(FacadesApp::currentLocale(), NumberFormatter::CURRENCY);
+        });
     }
 
     /**
@@ -25,6 +37,20 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+
+        // by this way will called the data from database one times.
+        $configs = Cache::get('configs');
+        if (!$configs) {
+            $configs = ConfigModel::all();
+            Cache::put('configs', $configs);
+        }
+
+        // here read the data from file fastest from database
+        // this add the key and value it to Config
+        foreach ($configs as $config) {
+            Config::set($config->name, $config->value);
+        }
+
         // here Gate will called before method before define
         // if this function return true of false won't call the define method
         /* if this method return true will be with user all authorizations and

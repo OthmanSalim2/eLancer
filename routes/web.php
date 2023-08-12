@@ -61,6 +61,6 @@ require __DIR__ . '/freelancer.php';
 require __DIR__ . '/client.php';
 
 
-// Route::get('payments/create', [PaymentsController::class, 'create'])->name('payments.create');
-// Route::get('/payments/callback/success', [PaymentsCallbackController::class, 'success'])->name('payments.success');
-// Route::get('/payments/callback/cancel', [PaymentsCallbackController::class, 'cancel'])->name('payments.cancel');
+Route::get('payments/create', [PaymentsController::class, 'create'])->name('payments.create');
+Route::get('/payments/callback/success', [PaymentsCallbackController::class, 'success'])->name('payments.success');
+Route::get('/payments/callback/cancel', [PaymentsCallbackController::class, 'cancel'])->name('payments.cancel');

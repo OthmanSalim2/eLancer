@@ -160,6 +160,8 @@ return [
         /*
          * Package Service Providers...
          */
+        // this custom service provider for module
+        App\Modules\Reviews\Providers\ReviewServiceProvider::class,
 
         /*
          * Application Service Providers...
@@ -185,9 +187,12 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         // 'Example' => App\Facades\Example::class,
+        'Currency' => App\Facades\Currency::class,
     ])->toArray(),
 
 
     'api_key' => env('API_KEY'),
+
+    'currency' => 'EUR',
 
 ];

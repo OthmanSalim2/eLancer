@@ -230,7 +230,7 @@
                                             <li><i class="icon-material-outline-location-on"></i>
                                                 {{ $project->category->name }}</li>
                                             <li><i class="icon-material-outline-access-time"></i>
-                                                {{ $project->created_at->diffForHumans() }}</li>
+                                                {{ \Carbon\Carbon::parse($project->created_at)->diffForHumans() }}</li>
                                         </ul>
                                         <div class="task-tags margin-top-15">
                                             @foreach ($project->tags as $tag)
@@ -244,7 +244,10 @@
                                 <div class="task-listing-bid">
                                     <div class="task-listing-bid-inner">
                                         <div class="task-offers">
+                                            {{-- currency() this method it found in Helper.php file --}}
                                             <strong>{{ currency($project->budget) }}</strong>
+                                            {{-- <strong>{{ App::make('currency')->formatCurrency($project->budget, config('app.currency')) }}</strong> --}}
+                                            {{-- <strong>{{ Currency::formatCurrency($project->budget, config('app.currency')) }}</strong> --}}
                                             <span>{{ $project->type }}</span>
                                         </div>
                                         <span class="button button-sliding-icon ripple-effect">Bid Now <i
